@@ -6,20 +6,75 @@
   <div class="col-md-8">
     <p style="white-space: break-spaces;">{{user.name}}</p>
     <p style="white-space: break-spaces;">{{user.email}}</p>
-    <p style="white-space: break-spaces;">{{user.restaurant_id.length}}已評論餐廳</p>
+    <p style="white-space: break-spaces;">{{user.comment_rest.length}} 已評論餐廳</p>
+    <p style="white-space: break-spaces;">{{user.fav_rest.length}} 收藏的餐廳</p>
+    <p style="white-space: break-spaces;">{{#if user.following_user}}{{user.following_user.length}}{{else}}0{{/if}} followings (追蹤者)</p>
+    <p style="white-space: break-spaces;">{{#if user.follower_user}}{{user.follower_user.length}}{{else}}0{{/if}} folowers (追隨者)</p>
     <form action="/users/{{user.id}}/edit">
       {{#ifCond user.id loginUser.id}}<button class="btn btn-primary">Edit</button>{{/ifCond}}
     </form>
   </div>
 </div>
 
-<div class="card mt-3">
-  <h5 class="card-header">{{user.restaurant_id.length}}已評論餐廳</h5>
-  <div class="card-body">
-    {{#each user.rest_image}}
-    <a href="/restaurants/{{sliceRestId this}}" style="text-decoration:none;">
-      <img src="{{this}}" class="m-3" style="height:100px; width:100px; object-fit:cover">
-    </a>
-    {{/each}}
+<div class="row">
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">
+        {{#if user.following_user}}{{user.following_user.length}}{{else}}0{{/if}} followings (追蹤者)
+      </div>
+      <div class="card-body">
+        {{#each user.following_user as | item i|}}
+        {{#if (lookup ../user.following_user_img i)}}
+        <a href="/users/{{this}}" style="text-decoration:none;">
+          <img src="{{lookup ../user.following_user_img i}}" class="m-1"
+            style="height:50px; width:50px; object-fit:cover">
+        </a>
+        {{else}}
+        <a href="/users/{{this}}" style="text-decoration:none;">
+          <img src="https://fakeimg.pl/140/" class="m-1" style="height:50px; width:50px; object-fit:cover">
+        </a>
+        {{/if}}
+        {{/each}}
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        {{#if user.follower_user}}{{user.follower_user.length}}{{else}}0{{/if}} folowers (追隨者)
+      </div>
+      <div class="card-body">
+        {{#each user.follower_user as | item i|}}
+        <a href="/users/{{this}}" style="text-decoration:none;">
+          <img src="{{lookup ../user.follower_user_img i}}" class="m-1"
+            style="height:50px; width:50px; object-fit:cover">
+        </a>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">
+        {{user.comment_rest.length}} 已評論餐廳
+      </div>
+      <div class="card-body">
+        {{#each user.rest_image}}
+        <a href="/restaurants/{{sliceRestId this}}" style="text-decoration:none;">
+          <img src="{{this}}" class="m-1" style="height:50px; width:50px; object-fit:cover">
+        </a>
+        {{/each}}
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        {{user.fav_rest.length}} 收藏的餐廳
+      </div>
+      <div class="card-body">
+        {{#each user.fav_rest_img}}
+        <a href="/restaurants/{{sliceRestId this}}" style="text-decoration:none;">
+          <img src="{{this}}" class="m-1" style="height:50px; width:50px; object-fit:cover">
+        </a>
+        {{/each}}
+      </div>
+    </div>
   </div>
 </div>

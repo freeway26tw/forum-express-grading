@@ -41,9 +41,21 @@ const userController = {
   },
   getUser: (req, res, next) => {
     return db.sequelize.query(`
-    SELECT u.id, u.name, u.email,u.image, json_arrayagg(rest_image) rest_image, json_arrayagg(restaurant_id) restaurant_id
+    SELECT u.id, u.name, u.email,u.image, rest_image, comment_rest, fav_rest, fav_rest_img, following_user, follower_user, following_user_img, follower_user_img
     FROM users u 
-    LEFT JOIN (SELECT user_id, restaurant_id, image AS rest_image FROM comments c JOIN restaurants r ON c.restaurant_id = r.id GROUP BY user_id, restaurant_id, rest_image) cc ON u.id = cc.user_id WHERE id = ${req.params.id}`, { type: db.sequelize.QueryTypes.SELECT })
+    LEFT JOIN (SELECT user_id, json_arrayagg(restaurant_id) comment_rest , json_arrayagg(image) rest_image
+    FROM (SELECT DISTINCT user_id, restaurant_id FROM comments) c JOIN restaurants r ON c.restaurant_id = r.id 
+    GROUP BY user_id) cc 
+    ON u.id = cc.user_id
+    LEFT JOIN (SELECT user_id, json_arrayagg(restaurant_id) fav_rest, json_arrayagg(image) fav_rest_img 
+    FROM favorites f JOIN restaurants r
+    ON f.restaurant_id = r.id
+    GROUP BY user_id) fr ON u.id = fr.user_id
+    LEFT JOIN (SELECT follower_id, json_arrayagg(following_id) following_user, json_arrayagg(image) following_user_img FROM followships f JOIN users u ON f.following_id = u.id GROUP BY follower_id) following_u
+    ON u.id = following_u.follower_id
+    LEFT JOIN (SELECT following_id, json_arrayagg(follower_id) follower_user, json_arrayagg(image) follower_user_img FROM followships f JOIN users u ON f.follower_id = u.id GROUP BY following_id) follower_u
+    ON u.id = follower_u.following_id 
+    WHERE u.id = ${req.params.id}`, { type: db.sequelize.QueryTypes.SELECT })
       .then(user => {
         if (!user[0].id) throw new Error('沒有此使用者')
         return res.render('users/profile', { user: user[0] })
